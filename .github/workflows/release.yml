@@ -23,12 +23,22 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+      
+      - name: Fix gradlew line endings
+        run: |
+          sed -i 's/\r$//' gradlew
+          chmod +x gradlew
+      
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v3
           
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-        
       - name: Build with Gradle
-        run: ./gradlew clean bootJar
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
+          
+      - name: Execute Gradle build
+        run: ./gradlew clean bootJar --no-daemon
         
       - name: Get version from build.gradle
         id: get_version
