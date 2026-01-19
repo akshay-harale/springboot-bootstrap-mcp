@@ -16,23 +16,85 @@ A Model Context Protocol (MCP) server for bootstrapping Spring Boot projects usi
    - Supports customization of build tool, language, dependencies, and more
    - Automatically creates parent directories if needed
 
-## Prerequisites
+## Quick Start
 
-- Java 21 or higher (to run the MCP server)
-- Internet connection (to access start.spring.io)
+### 1. Download the JAR
 
-## Installation
+Go to the [Releases page](../../releases/latest) and download `app-bootstrap-0.0.1-SNAPSHOT.jar`
 
-### Option 1: Download Pre-built Release (Recommended)
+Save it to: `C:/mcp-servers/app-bootstrap.jar` (Windows) or `~/mcp-servers/app-bootstrap.jar` (Mac/Linux)
 
-**No compilation needed!** Download the latest pre-built JAR from the [Releases page](../../releases/latest).
+### 2. Configure Your MCP Client
 
-1. Go to the [Releases page](../../releases/latest)
-2. Download `app-bootstrap-0.0.1-SNAPSHOT.jar`
-3. Save it to a location like `C:/mcp-servers/` or `~/mcp-servers/`
-4. Skip to the [Running with MCP Clients](#running-with-mcp-clients) section
+Choose your client below and add the configuration:
 
-### Option 2: Build from Source
+#### GitHub Copilot (VS Code)
+
+Edit: `%APPDATA%\Code\User\mcp.json` (Windows) or `~/Library/Application Support/Code/User/mcp.json` (Mac/Linux)
+
+```json
+{
+  "mcpServers": {
+    "springboot-bootstrap": {
+      "command": "java",
+      "args": ["-jar", "C:/mcp-servers/app-bootstrap.jar"]
+    }
+  }
+}
+```
+
+#### Claude Desktop
+
+Edit: `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Application Support/Claude/claude_desktop_config.json` (Mac)
+
+```json
+{
+  "mcpServers": {
+    "springboot-bootstrap": {
+      "command": "java",
+      "args": ["-jar", "C:/mcp-servers/app-bootstrap.jar"]
+    }
+  }
+}
+```
+
+#### Other MCP Clients (Cline, Zed, Cody, Continue.dev)
+
+```json
+{
+  "mcpServers": {
+    "springboot-bootstrap": {
+      "command": "java",
+      "args": ["-jar", "/path/to/app-bootstrap.jar"]
+    }
+  }
+}
+```
+
+**Mac/Linux path example**: `/Users/username/mcp-servers/app-bootstrap.jar`
+
+### 3. Restart Your Client
+
+Restart VS Code, Claude Desktop, or your MCP client to load the server.
+
+### 4. Start Using
+
+Try prompts like:
+```
+Create a Spring Boot REST API with PostgreSQL and JPA, save to C:/projects/myapi.zip
+```
+
+---
+
+## Detailed Documentation
+
+### Alternative Installation Methods
+
+#### Option 1: Download Pre-built Release (Recommended - Already covered in Quick Start above)
+
+See the [Quick Start](#quick-start) section above for the easiest way to get started.
+
+#### Option 2: Build from Source
 
 If you want to build from source or contribute to the project:
 
@@ -54,9 +116,9 @@ The built JAR file will be located at: `build/libs/app-bootstrap-0.0.1-SNAPSHOT.
 
 ## Configuration
 
-### Application Properties
+### Server Configuration (Optional)
 
-Located at `src/main/resources/application.properties`:
+The server is pre-configured and ready to use. Default settings are in `src/main/resources/application.properties`:
 
 ```properties
 spring.main.web-application-type=none
@@ -72,50 +134,45 @@ spring.ai.mcp.server.annotation-scanner.enabled=true
 logging.file.name=./mcp-springboot-bootstrap-stdio-server.log
 ```
 
-### Alternative JSON Configuration
+**Note**: An alternative WebFlux configuration is available at `src/main/resources/application.json` for reactive applications (requires building from source).
 
-A sample WebFlux configuration is available at `src/main/resources/application.json` for reactive applications.
+---
 
-## Running with MCP Clients
+## Client-Specific Configuration Details
 
-### 1. GitHub Copilot (VS Code)
+The Quick Start section above covers most use cases. This section provides additional details and troubleshooting.
 
-#### Step 1: Get the JAR file
+### GitHub Copilot (VS Code) - Extended
 
-**Option A: Download pre-built release (Recommended)**
-- Download from [Releases page](../../releases/latest)
-- Save to a location like `C:/mcp-servers/app-bootstrap-0.0.1-SNAPSHOT.jar`
-
-**Option B: Build from source**
-```bash
-.\gradlew.bat clean bootJar
-```
-
-#### Step 2: Configure MCP in VS Code
-
-Edit your MCP configuration file:
+Configuration file locations:
 - **Windows**: `%APPDATA%\Code\User\mcp.json`
 - **macOS**: `~/Library/Application Support/Code/User/mcp.json`
 - **Linux**: `~/.config/Code/User/mcp.json`
 
-Add this configuration:
+**Complete configuration example:**
 
 ```json
 {
   "mcpServers": {
     "springboot-bootstrap": {
       "command": "java",
-      "args": [
-        "-jar",
-        "C:/mcp-servers/app-bootstrap-0.0.1-SNAPSHOT.jar"
-      ],
+      "args": ["-jar", "C:/mcp-servers/app-bootstrap.jar"],
       "env": {}
     }
   }
 }
 ```
 
-**Important**: Update the JAR path to match where you saved/built the file.
+**Mac/Linux example:**
+```json
+{
+  "mcpServers": {
+    "springboot-bootstrap": {
+      "command": "java",
+      "args": ["-jar", "/Users/username/mcp-servers/app-bootstrap.jar"]
+    }
+  }
+}
 
 #### Step 3: Restart VS Code
 
@@ -178,39 +235,26 @@ Add this configuration:
 }
 ```
 
-**Important**: Update the JAR path to match where you downloaded/built the file.
+After restarting Claude Desktop, the tools will be available.
 
-#### Step 3: Restart Claude Desktop
+### Other MCP Clients - Extended
 
-The Spring Boot Bootstrap tools will be available in Claude Desktop.
-
-### 3. Other MCP Clients
-
-Any MCP-compatible client can use this server. 
-
-#### Step 1: Download the JAR
-Download the latest release from the [Releases page](../../releases/latest) or build from source.
-
-#### Step 2: Configure your MCP client
-
-The general configuration pattern is:
+Configuration for Cline, Zed Editor, Sourcegraph Cody, Continue.dev, and other MCP-compatible clients:
 
 ```json
 {
-  "command": "java",
-  "args": [
-    "-jar",
-    "/path/to/app-bootstrap-0.0.1-SNAPSHOT.jar"
-  ]
+  "mcpServers": {
+    "springboot-bootstrap": {
+      "command": "java",
+      "args": ["-jar", "/path/to/app-bootstrap.jar"]
+    }
+  }
 }
 ```
 
-#### Supported MCP Clients:
-- **Cline** (VS Code Extension)
-- **Zed Editor**
-- **Sourcegraph Cody**
-- **Continue.dev**
-- Any client supporting MCP over STDIO
+Replace `/path/to/app-bootstrap.jar` with your actual file path.
+
+---
 
 ## Usage Examples
 
