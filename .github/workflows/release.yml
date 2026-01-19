@@ -51,20 +51,20 @@ jobs:
         id: timestamp
         run: echo "TIMESTAMP=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
         
-      - name: Create Release Tag
-        id: create_tag
+      - name: Generate Release Tag Name
+        id: generate_tag
         run: |
           TAG_NAME="v${{ steps.get_version.outputs.VERSION }}-${{ steps.timestamp.outputs.TIMESTAMP }}"
           echo "TAG_NAME=$TAG_NAME" >> $GITHUB_OUTPUT
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag $TAG_NAME
-          git push origin $TAG_NAME
+          echo "Generated tag: $TAG_NAME"
           
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}
+          name: Spring Boot Bootstrap MCP v2
+        with:
+          tag_name: ${{ steps.generate_tag.outputs.TAG_NAME }}
           name: Spring Boot Bootstrap MCP v${{ steps.get_version.outputs.VERSION }}
           body: |
             ## Spring Boot Bootstrap MCP Server
@@ -78,8 +78,18 @@ jobs:
             
             ### Quick Start
             1. Download `app-bootstrap-${{ steps.get_version.outputs.VERSION }}.jar`
-            2. Configure your MCP client (see README for details)
-            3. Start using Spring Boot bootstrapping tools!
+            2. Add to your MCP client config:
+               ```json
+               {
+                 "mcpServers": {
+                   "springboot-bootstrap": {
+                     "command": "java",
+                     "args": ["-jar", "/path/to/app-bootstrap.jar"]
+                   }
+                 }
+               }
+               ```
+            3. Restart your client and start creating Spring Boot projects!
             
             ### Version Info
             - **Version**: ${{ steps.get_version.outputs.VERSION }}
@@ -95,5 +105,5 @@ jobs:
             build/libs/app-bootstrap-*.jar
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          make_latest: true
+          fail_on_unmatched_files: tru
