@@ -18,18 +18,36 @@ A Model Context Protocol (MCP) server for bootstrapping Spring Boot projects usi
 
 ## Prerequisites
 
-- Java 21 or higher
-- Gradle (included via wrapper)
+- Java 21 or higher (to run the MCP server)
 - Internet connection (to access start.spring.io)
 
-## Building the Project
+## Installation
+
+### Option 1: Download Pre-built Release (Recommended)
+
+**No compilation needed!** Download the latest pre-built JAR from the [Releases page](../../releases/latest).
+
+1. Go to the [Releases page](../../releases/latest)
+2. Download `app-bootstrap-0.0.1-SNAPSHOT.jar`
+3. Save it to a location like `C:/mcp-servers/` or `~/mcp-servers/`
+4. Skip to the [Running with MCP Clients](#running-with-mcp-clients) section
+
+### Option 2: Build from Source
+
+If you want to build from source or contribute to the project:
+
+#### Prerequisites for Building
+- Java 21 or higher
+- Gradle (included via wrapper)
+
+#### Build Steps
 
 ```bash
 # Windows
-.\gradlew.bat build
+.\gradlew.bat clean bootJar
 
 # Linux/Mac
-./gradlew build
+./gradlew clean bootJar
 ```
 
 The built JAR file will be located at: `build/libs/app-bootstrap-0.0.1-SNAPSHOT.jar`
@@ -62,9 +80,15 @@ A sample WebFlux configuration is available at `src/main/resources/application.j
 
 ### 1. GitHub Copilot (VS Code)
 
-#### Step 1: Build the JAR file
+#### Step 1: Get the JAR file
+
+**Option A: Download pre-built release (Recommended)**
+- Download from [Releases page](../../releases/latest)
+- Save to a location like `C:/mcp-servers/app-bootstrap-0.0.1-SNAPSHOT.jar`
+
+**Option B: Build from source**
 ```bash
-.\gradlew.bat bootJar
+.\gradlew.bat clean bootJar
 ```
 
 #### Step 2: Configure MCP in VS Code
@@ -83,7 +107,7 @@ Add this configuration:
       "command": "java",
       "args": [
         "-jar",
-        "C:/code/springboot-bootstrap-mcp/build/libs/app-bootstrap-0.0.1-SNAPSHOT.jar"
+        "C:/mcp-servers/app-bootstrap-0.0.1-SNAPSHOT.jar"
       ],
       "env": {}
     }
@@ -91,7 +115,7 @@ Add this configuration:
 }
 ```
 
-**Important**: Update the JAR path to match your actual project location.
+**Important**: Update the JAR path to match where you saved/built the file.
 
 #### Step 3: Restart VS Code
 
@@ -104,9 +128,17 @@ Create a Spring Boot REST API with PostgreSQL and JPA, save to C:/projects/myapi
 
 ### 2. Claude Desktop
 
-#### Step 1: Build the JAR file
+#### Step 1: Get the JAR file
+
+**Option A: Download pre-built release (Recommended)**
+- Download from [Releases page](../../releases/latest)
+- Save to a location like `C:/mcp-servers/app-bootstrap-0.0.1-SNAPSHOT.jar` (Windows)
+- Or `~/mcp-servers/app-bootstrap-0.0.1-SNAPSHOT.jar` (macOS/Linux)
+
+**Option B: Build from source**
 ```bash
-.\gradlew.bat bootJar
+.\gradlew.bat clean bootJar  # Windows
+./gradlew clean bootJar      # Linux/Mac
 ```
 
 #### Step 2: Configure Claude Desktop
@@ -124,14 +156,29 @@ Add this configuration:
       "command": "java",
       "args": [
         "-jar",
-        "C:/code/springboot-bootstrap-mcp/build/libs/app-bootstrap-0.0.1-SNAPSHOT.jar"
+        "C:/mcp-servers/app-bootstrap-0.0.1-SNAPSHOT.jar"
       ]
     }
   }
 }
 ```
 
-**Important**: Update the JAR path to match your actual project location.
+**macOS/Linux example:**
+```json
+{
+  "mcpServers": {
+    "springboot-bootstrap": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "/Users/username/mcp-servers/app-bootstrap-0.0.1-SNAPSHOT.jar"
+      ]
+    }
+  }
+}
+```
+
+**Important**: Update the JAR path to match where you downloaded/built the file.
 
 #### Step 3: Restart Claude Desktop
 
@@ -139,7 +186,14 @@ The Spring Boot Bootstrap tools will be available in Claude Desktop.
 
 ### 3. Other MCP Clients
 
-Any MCP-compatible client can use this server. The general configuration pattern is:
+Any MCP-compatible client can use this server. 
+
+#### Step 1: Download the JAR
+Download the latest release from the [Releases page](../../releases/latest) or build from source.
+
+#### Step 2: Configure your MCP client
+
+The general configuration pattern is:
 
 ```json
 {
@@ -257,6 +311,15 @@ Use `getSpringBootInitDetails()` to get the complete list with descriptions.
 
 ## Development
 
+### Automated Releases
+
+Every push to the `main` branch automatically triggers a GitHub Actions workflow that:
+1. Builds the project with Gradle
+2. Creates a timestamped release tag
+3. Publishes a new GitHub release with the pre-built JAR file
+
+**No manual building needed for end users!** Just download from the [Releases page](../../releases/latest).
+
 ### Project Structure
 
 ```
@@ -272,7 +335,7 @@ src/main/java/org/springboot/bootstrap/
 
 1. Add a new method in `SpringInItTools.java`
 2. Annotate with `@McpTool` with name and description
-3. Rebuild the project
+3. Push to main branch (automatic build and release)
 4. Tools are automatically discovered via annotation scanning
 
 ### Testing
