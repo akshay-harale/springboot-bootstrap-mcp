@@ -92,9 +92,18 @@ public class SpringInItTools {
      * This tool generates and downloads a Spring Boot project from start.spring.io based on
      * user specifications. Call getSpringBootInitDetails() FIRST to get valid parameter values.
      * 
+     * Example API call:
+     * https://start.spring.io/starter.zip?type=gradle-project&language=java&bootVersion=3.5.9
+     * &groupId=com.example&artifactId=demo&name=demo&description=Demo%20project%20for%20Spring%20Boot
+     * &packageName=com.example.demo&packaging=jar&javaVersion=17&configurationFileFormat=properties
+     * &dependencies=web,postgresql
+     * 
      * @param type Project build tool type. Common values: "gradle-project", "maven-project", "gradle-project-kotlin"
      * @param language Programming language. Values: "java", "kotlin", "groovy"
-     * @param bootVersion Spring Boot version. Example: "3.5.9", "3.4.2", "3.3.7"
+     * @param bootVersion Spring Boot version. IMPORTANT: Use EXACT version from getSpringBootInitDetails().
+     *                    Spring Boot 3.x uses semantic versioning (e.g., "3.5.9", "3.4.2").
+     *                    Spring Boot 2.x requires .RELEASE suffix (e.g., "2.7.18.RELEASE").
+     *                    Always call getSpringBootInitDetails() first to get the correct format.
      * @param groupId Maven group ID. Example: "com.example"
      * @param artifactId Maven artifact ID (project name). Example: "demo"
      * @param name Project display name. Example: "Demo"
@@ -117,7 +126,9 @@ public class SpringInItTools {
         "Parameters: " +
         "type (required): Project build tool - 'gradle-project' or 'maven-project'. " +
         "language (required): Programming language - 'java', 'kotlin', or 'groovy'. " +
-        "bootVersion (required): Spring Boot version like '3.5.9' or '3.4.2'. " +
+        "bootVersion (required): EXACT Spring Boot version from getSpringBootInitDetails(). " +
+        "CRITICAL: Spring Boot 3.x uses format '3.5.9' (no suffix). Spring Boot 2.x uses format '2.7.18.RELEASE' (with .RELEASE suffix). " +
+        "Do NOT guess the version format - always get it from getSpringBootInitDetails() first. " +
         "groupId (required): Maven group ID like 'com.example'. " +
         "artifactId (required): Project/artifact ID like 'demo'. " +
         "name (required): Project display name like 'Demo Application'. " +

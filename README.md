@@ -318,7 +318,7 @@ No parameters required. Returns JSON with all available configuration options.
 |-----------|----------|-------------|---------|
 | `type` | Yes | Build tool type | `gradle-project`, `maven-project` |
 | `language` | Yes | Programming language | `java`, `kotlin`, `groovy` |
-| `bootVersion` | Yes | Spring Boot version | `3.5.9`, `3.4.2` |
+| `bootVersion` | Yes | **Spring Boot version (EXACT format from metadata)** | `3.5.9`, `2.7.18.RELEASE` |
 | `groupId` | Yes | Maven group ID | `com.example` |
 | `artifactId` | Yes | Project/artifact ID | `demo` |
 | `name` | Yes | Project display name | `Demo Application` |
@@ -330,6 +330,16 @@ No parameters required. Returns JSON with all available configuration options.
 | `configurationFileFormat` | No | Config file format | `properties`, `yaml` |
 | `downloadPath` | Yes | **Path for output** | See below ⬇️ |
 
+#### Important: Spring Boot Version Format
+
+⚠️ **CRITICAL**: Spring Boot uses different version formats:
+
+- **Spring Boot 3.x**: Semantic versioning (e.g., `3.5.9`, `3.4.2`, `3.3.7`)
+- **Spring Boot 2.x**: Includes `.RELEASE` suffix (e.g., `2.7.18.RELEASE`, `2.6.15.RELEASE`)
+
+**Always call `getSpringBootInitDetails()` first** to get the exact version format. Do not guess or assume the format!
+| `downloadPath` | Yes | **Path for output** | See below ⬇️ |
+
 #### downloadPath Behavior
 
 The `downloadPath` parameter determines how the project is delivered:
@@ -337,6 +347,16 @@ The `downloadPath` parameter determines how the project is delivered:
 - **Ends with `.zip`** → Saves as ZIP file
   - Example: `C:/projects/myapp.zip`
   - Use case: Archive, share, or manually extract later
+
+#### Sample API Call
+
+For reference, here's what the actual Spring Initializr API call looks like:
+
+```
+https://start.spring.io/starter.zip?type=gradle-project&language=java&bootVersion=3.5.9&groupId=com.example&artifactId=demo&name=demo&description=Demo%20project%20for%20Spring%20Boot&packageName=com.example.demo&packaging=jar&javaVersion=17&configurationFileFormat=properties&dependencies=web,postgresql
+```
+
+This URL structure shows how all the parameters are passed to Spring Initializr. The MCP tool handles building this URL automatically based on your inputs.
 
 - **Does NOT end with `.zip`** → Extracts all files to directory
   - Example: `C:/projects/myapp`
