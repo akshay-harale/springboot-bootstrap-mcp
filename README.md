@@ -12,9 +12,11 @@ A Model Context Protocol (MCP) server for bootstrapping Spring Boot projects usi
    - Use this first to discover valid parameter values
 
 2. **downloadSpringBootProject**
-   - Downloads a fully configured Spring Boot project as a ZIP file
+   - Downloads a fully configured Spring Boot project as a ZIP file OR extracts directly to a directory
+   - **Smart Path Detection**: If path ends with `.zip`, saves as ZIP file; otherwise extracts all files to directory
    - Supports customization of build tool, language, dependencies, and more
    - Automatically creates parent directories if needed
+   - Extracted projects are ready to open in your IDE immediately
 
 ## Quick Start
 
@@ -81,7 +83,11 @@ Restart VS Code, Claude Desktop, or your MCP client to load the server.
 
 Try prompts like:
 ```
+# Download as ZIP file
 Create a Spring Boot REST API with PostgreSQL and JPA, save to C:/projects/myapi.zip
+
+# Extract directly to directory (ready to open in IDE)
+Create a Spring Boot REST API with PostgreSQL and JPA, extract to C:/projects/myapi
 ```
 
 ---
@@ -258,19 +264,19 @@ Replace `/path/to/app-bootstrap.jar` with your actual file path.
 
 ## Usage Examples
 
-### Example 1: Basic Web Application
+### Example 1: Basic Web Application (Extracted)
 
 ```
-Create a basic Spring Boot web application with Java 21 and save it to C:/projects/demo.zip
+Create a basic Spring Boot web application with Java 21 and extract it to C:/projects/demo
 ```
 
 The AI will:
 1. Call `getSpringBootInitDetails()` to get available options
 2. Select appropriate defaults (Spring Web, latest Spring Boot version, etc.)
 3. Call `downloadSpringBootProject()` with the configuration
-4. Save the ZIP file to the specified location
+4. Extract all files directly to `C:/projects/demo` (ready to open in IDE)
 
-### Example 2: Microservice with Database
+### Example 2: Microservice with Database (ZIP Download)
 
 ```
 I need a Spring Boot microservice with:
@@ -282,11 +288,23 @@ I need a Spring Boot microservice with:
 - Save to: C:/microservices/user-service.zip
 ```
 
-### Example 3: Reactive Application
+**Result**: Downloads a ZIP file that can be distributed or archived.
+
+### Example 3: Reactive Application (Extracted)
 
 ```
-Create a Spring Boot WebFlux application with MongoDB and save to C:/projects/reactive-api.zip
+Create a Spring Boot WebFlux application with MongoDB and extract to C:/projects/reactive-api
 ```
+
+**Result**: All project files extracted and ready to import into your IDE.
+
+### Example 4: Quick Start Development
+
+```
+I need a REST API with Spring Boot, PostgreSQL, and Lombok. Extract it to C:/workspace/api-project so I can start coding immediately.
+```
+
+**Result**: Project extracted and ready - just open the directory in VS Code or IntelliJ!
 
 ## Tool Parameters
 
@@ -310,7 +328,20 @@ No parameters required. Returns JSON with all available configuration options.
 | `javaVersion` | Yes | Java version | `17`, `21`, `23` |
 | `dependencies` | Yes | Comma-separated dependency IDs | `web,data-jpa,postgresql` |
 | `configurationFileFormat` | No | Config file format | `properties`, `yaml` |
-| `downloadPath` | Yes | Absolute path for ZIP file | `C:/projects/app.zip` |
+| `downloadPath` | Yes | **Path for output** | See below ⬇️ |
+
+#### downloadPath Behavior
+
+The `downloadPath` parameter determines how the project is delivered:
+
+- **Ends with `.zip`** → Saves as ZIP file
+  - Example: `C:/projects/myapp.zip`
+  - Use case: Archive, share, or manually extract later
+
+- **Does NOT end with `.zip`** → Extracts all files to directory
+  - Example: `C:/projects/myapp`
+  - Use case: Ready to open in IDE immediately, start coding right away
+  - All project files are extracted maintaining the proper structure
 
 ## Common Dependencies
 

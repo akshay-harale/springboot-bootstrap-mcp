@@ -1,6 +1,6 @@
 package org.springboot.bootstrap.tools;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springframework.stereotype.Component;
@@ -85,7 +87,7 @@ public class SpringInItTools {
     }
 
     /**
-     * Step 2: Download a customized Spring Boot project as a ZIP file
+     * Step 2: Download a customized Spring Boot project as a ZIP file or extract it to a directory
      * 
      * This tool generates and downloads a Spring Boot project from start.spring.io based on
      * user specifications. Call getSpringBootInitDetails() FIRST to get valid parameter values.
@@ -102,11 +104,13 @@ public class SpringInItTools {
      * @param javaVersion Java version. Common values: "17", "21", "23"
      * @param dependencies Comma-separated dependency IDs. Example: "web,data-jpa,postgresql,lombok"
      * @param configurationFileFormat Config file format. Values: "properties", "yaml"
-     * @param downloadPath Absolute path where the ZIP file should be saved. Example: "C:/projects/my-spring-app.zip"
+     * @param downloadPath Absolute path where the ZIP file should be saved OR directory where files should be extracted. 
+     *                     If ends with .zip, saves as ZIP file. Otherwise, extracts to that directory.
+     *                     Examples: "C:/projects/my-app.zip" (saves ZIP) or "C:/projects/my-app" (extracts files)
      * @return Success message with file path or error message
      */
     @McpTool(name = "downloadSpringBootProject",
-        description = "Download a customized Spring Boot project ZIP file from start.spring.io. " +
+        description = "Download a customized Spring Boot project from start.spring.io. " +
         "This tool generates a complete Spring Boot project with specified configuration and dependencies. " +
         "IMPORTANT: Call getSpringBootInitDetails() FIRST to discover valid parameter values. " +
         "Parameters: " +
@@ -122,7 +126,8 @@ public class SpringInItTools {
         "javaVersion (required): Java version like '17', '21', or '23'. " +
         "dependencies (required): Comma-separated dependency IDs from metadata like 'web,data-jpa,lombok'. " +
         "configurationFileFormat (optional): 'properties' or 'yaml', defaults to 'properties'. " +
-        "downloadPath (required): Absolute file path where ZIP should be saved like 'C:/projects/app.zip'. " +
+        "downloadPath (required): Path where project should be saved. If ends with '.zip', downloads as ZIP file. " +
+        "Otherwise extracts files directly to that directory. Examples: 'C:/projects/app.zip' (ZIP) or 'C:/projects/app' (extracted). " +
         "Returns: Success message with saved file path or error details.")
     public String downloadSpringBootProject(
             String type,
@@ -178,19 +183,35 @@ public class SpringInItTools {
                 return "Error: Received empty response from start.spring.io";
             }
 
-            // Ensure parent directories exist
-            Path path = Paths.get(downloadPath);
-            Files.createDirectories(path.getParent());
+            // Check if downloadPath ends with .zip - if so, save as ZIP, otherwise extract
+            boolean saveAsZip = downloadPath.toLowerCase().endsWith(".zip");
+            
+            if (saveAsZip) {
+                // Save as ZIP file
+                Path path = Paths.get(downloadPath);
+                Files.createDirectories(path.getParent());
 
-            // Save to file
-            try (FileOutputStream fos = new FileOutputStream(downloadPath)) {
-                fos.write(zipBytes);
+                try (FileOutputStream fos = new FileOutputStream(downloadPath)) {
+                    fos.write(zipBytes);
+                }
+
+                logger.info("Successfully downloaded Spring Boot project to: " + downloadPath);
+                return "Successfully downloaded Spring Boot project (" + zipBytes.length + " bytes) to: " + downloadPath + 
+                       "\nProject details: " + name + " (" + artifactId + ") with Spring Boot " + bootVersion +
+                       "\nDependencies: " + dependencies;
+            } else {
+                // Extract ZIP to directory
+                Path extractPath = Paths.get(downloadPath);
+                Files.createDirectories(extractPath);
+                
+                int filesExtracted = extractZipToDirectory(zipBytes, extractPath);
+                
+                logger.info("Successfully extracted Spring Boot project to: " + downloadPath);
+                return "Successfully extracted Spring Boot project (" + filesExtracted + " files) to: " + downloadPath + 
+                       "\nProject details: " + name + " (" + artifactId + ") with Spring Boot " + bootVersion +
+                       "\nDependencies: " + dependencies +
+                       "\n\nYou can now open this directory in your IDE and start developing!";
             }
-
-            logger.info("Successfully downloaded Spring Boot project to: " + downloadPath);
-            return "Successfully downloaded Spring Boot project (" + zipBytes.length + " bytes) to: " + downloadPath + 
-                   "\nProject details: " + name + " (" + artifactId + ") with Spring Boot " + bootVersion +
-                   "\nDependencies: " + dependencies;
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "IO Error downloading Spring Boot project", e);
@@ -199,5 +220,52 @@ public class SpringInItTools {
             logger.log(Level.SEVERE, "Error downloading Spring Boot project", e);
             return "Error downloading project: " + e.getMessage();
         }
+    }
+
+    /**
+     * Extracts a ZIP file from byte array to a directory
+     * 
+     * @param zipBytes The ZIP file content as byte array
+     * @param targetDir The directory where files should be extracted
+     * @return Number of files extracted
+     * @throws IOException If extraction fails
+     */
+    private int extractZipToDirectory(byte[] zipBytes, Path targetDir) throws IOException {
+        int filesExtracted = 0;
+        
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(zipBytes);
+             ZipInputStream zis = new ZipInputStream(bais)) {
+            
+            ZipEntry entry;
+            byte[] buffer = new byte[8192];
+            
+            while ((entry = zis.getNextEntry()) != null) {
+                Path filePath = targetDir.resolve(entry.getName());
+                
+                if (entry.isDirectory()) {
+                    Files.createDirectories(filePath);
+                    logger.fine("Created directory: " + filePath);
+                } else {
+                    // Ensure parent directories exist
+                    Files.createDirectories(filePath.getParent());
+                    
+                    // Extract file
+                    try (FileOutputStream fos = new FileOutputStream(filePath.toFile())) {
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                    }
+                    
+                    filesExtracted++;
+                    logger.fine("Extracted file: " + filePath);
+                }
+                
+                zis.closeEntry();
+            }
+        }
+        
+        logger.info("Total files extracted: " + filesExtracted);
+        return filesExtracted;
     }
 }
