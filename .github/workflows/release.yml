@@ -39,6 +39,11 @@ jobs:
           
       - name: Execute Gradle build
         run: ./gradlew clean bootJar --no-daemon
+      
+      - name: List built artifacts
+        run: |
+          echo "Contents of build/libs:"
+          ls -lh build/libs/
         
       - name: Get version from build.gradle
         id: get_version
@@ -103,4 +108,6 @@ jobs:
           draft: false
           prerelease: false
           make_latest: true
-          fail_on_unmatched_files: tru
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -39,3 +39,8 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.named('bootJar') {
+	archiveBaseName = 'app-bootstrap'
+	archiveVersion = version
+}
