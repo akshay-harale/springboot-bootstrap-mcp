@@ -112,7 +112,8 @@ public class SpringInItTools {
     @McpTool(name = "downloadSpringBootProject",
         description = "Download a customized Spring Boot project from start.spring.io. " +
         "This tool generates a complete Spring Boot project with specified configuration and dependencies. " +
-        "IMPORTANT: Call getSpringBootInitDetails() FIRST to discover valid parameter values. " +
+        "IMPORTANT: Call getSpringBootInitDetails() FIRST to discover valid parameter values." +
+        "Use exact parameter values that you get from getSpringBootInitDetails(). "+
         "Parameters: " +
         "type (required): Project build tool - 'gradle-project' or 'maven-project'. " +
         "language (required): Programming language - 'java', 'kotlin', or 'groovy'. " +
