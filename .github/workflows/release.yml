@@ -61,9 +61,6 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}
-          name: Spring Boot Bootstrap MCP v2
-        with:
           tag_name: ${{ steps.generate_tag.outputs.TAG_NAME }}
           name: Spring Boot Bootstrap MCP v${{ steps.get_version.outputs.VERSION }}
           body: |
