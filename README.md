@@ -20,11 +20,29 @@ A Model Context Protocol (MCP) server for bootstrapping Spring Boot projects usi
 
 ## Quick Start
 
-### 1. Download the JAR
+### 1. Download the Server
 
-Go to the [Releases page](../../releases/latest) and download `app-bootstrap-0.0.1-SNAPSHOT.jar`
+Go to the [Releases page](../../releases/latest) and download the appropriate version for your platform:
 
-Save it to: `C:/mcp-servers/app-bootstrap.jar` (Windows) or `~/mcp-servers/app-bootstrap.jar` (Mac/Linux)
+#### Option A: Native Binary (Recommended - Ultra Fast Startup)
+**Fastest startup time (~87ms) with no Java installation required!**
+
+- **Windows**: Download `app-bootstrap.exe`
+- **macOS**: Download `app-bootstrap` (macOS binary)
+- **Linux**: Download `app-bootstrap` (Linux binary)
+
+Save to: `C:/mcp-servers/` (Windows) or `~/mcp-servers/` (Mac/Linux)
+
+**macOS/Linux**: Make the binary executable:
+```bash
+chmod +x ~/mcp-servers/app-bootstrap
+```
+
+#### Option B: JAR File (Requires Java 21+)
+
+Download `app-bootstrap-0.0.1-SNAPSHOT.jar`
+
+Save to: `C:/mcp-servers/app-bootstrap.jar` (Windows) or `~/mcp-servers/app-bootstrap.jar` (Mac/Linux)
 
 ### 2. Configure Your MCP Client
 
@@ -34,6 +52,19 @@ Choose your client below and add the configuration:
 
 Edit: `%APPDATA%\Code\User\mcp.json` (Windows) or `~/Library/Application Support/Code/User/mcp.json` (Mac/Linux)
 
+**Native Binary (Recommended - Fastest):**
+```json
+{
+  "mcpServers": {
+    "springboot-bootstrap": {
+      "command": "C:/mcp-servers/app-bootstrap.exe",
+      "args": []
+    }
+  }
+}
+```
+
+**JAR File:**
 ```json
 {
   "mcpServers": {
@@ -49,6 +80,31 @@ Edit: `%APPDATA%\Code\User\mcp.json` (Windows) or `~/Library/Application Support
 
 Edit: `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Application Support/Claude/claude_desktop_config.json` (Mac)
 
+**Native Binary (Recommended - Fastest):**
+```json
+{
+  "mcpServers": {
+    "springboot-bootstrap": {
+      "command": "C:/mcp-servers/app-bootstrap.exe",
+      "args": []
+    }
+  }
+}
+```
+
+**macOS/Linux Native Binary:**
+```json
+{
+  "mcpServers": {
+    "springboot-bootstrap": {
+      "command": "/Users/username/mcp-servers/app-bootstrap",
+      "args": []
+    }
+  }
+}
+```
+
+**JAR File:**
 ```json
 {
   "mcpServers": {
@@ -62,6 +118,19 @@ Edit: `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Appl
 
 #### Other MCP Clients (Cline, Zed, Cody, Continue.dev)
 
+**Native Binary (Recommended - Fastest):**
+```json
+{
+  "mcpServers": {
+    "springboot-bootstrap": {
+      "command": "/path/to/app-bootstrap",
+      "args": []
+    }
+  }
+}
+```
+
+**JAR File:**
 ```json
 {
   "mcpServers": {
@@ -73,7 +142,10 @@ Edit: `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Appl
 }
 ```
 
-**Mac/Linux path example**: `/Users/username/mcp-servers/app-bootstrap.jar`
+**Path examples**:
+- Windows native: `C:/mcp-servers/app-bootstrap.exe`
+- Mac/Linux native: `/Users/username/mcp-servers/app-bootstrap`
+- JAR: `/Users/username/mcp-servers/app-bootstrap.jar`
 
 ### 3. Restart Your Client
 
@@ -100,6 +172,10 @@ Create a Spring Boot REST API with PostgreSQL and JPA, extract to C:/projects/my
 
 See the [Quick Start](#quick-start) section above for the easiest way to get started.
 
+**Available formats:**
+- **Native Binary**: Ultra-fast startup (~87ms), no Java installation required
+- **JAR File**: Traditional Java archive, requires Java 21+
+
 #### Option 2: Build from Source
 
 If you want to build from source or contribute to the project:
@@ -107,9 +183,11 @@ If you want to build from source or contribute to the project:
 #### Prerequisites for Building
 - Java 21 or higher
 - Gradle (included via wrapper)
+- GraalVM (optional, for native image builds)
 
 #### Build Steps
 
+**Standard JAR:**
 ```bash
 # Windows
 .\gradlew.bat clean bootJar
@@ -119,6 +197,25 @@ If you want to build from source or contribute to the project:
 ```
 
 The built JAR file will be located at: `build/libs/app-bootstrap-0.0.1-SNAPSHOT.jar`
+
+**Native Image (GraalVM required):**
+```bash
+# Windows
+.\gradlew.bat nativeCompile
+
+# Linux/Mac
+./gradlew nativeCompile
+```
+
+The native binary will be located at:
+- Windows: `build/native/nativeCompile/app-bootstrap.exe`
+- Linux/Mac: `build/native/nativeCompile/app-bootstrap`
+
+**Benefits of Native Image:**
+- **Ultra-fast startup**: ~87 milliseconds vs 2-5 seconds for JVM
+- **Lower memory**: ~1/4 of JVM memory usage
+- **No Java required**: Standalone executable
+- **Perfect for**: Serverless, containers, CLI tools
 
 ## Configuration
 
@@ -408,10 +505,23 @@ Use `getSpringBootInitDetails()` to get the complete list with descriptions.
 
 ### Automated Releases
 
-Every push to the `main` branch automatically triggers a GitHub Actions workflow that:
-1. Builds the project with Gradle
-2. Creates a timestamped release tag
-3. Publishes a new GitHub release with the pre-built JAR file
+Every push to the `main` branch or when a version tag is created automatically triggers a GitHub Actions workflow that:
+1. Builds native executables for Windows, macOS, and Linux using GraalVM
+2. Builds the traditional JAR file
+3. Creates a GitHub release with all artifacts
+4. Uploads native binaries and JAR to the release
+
+**For releases with version tags (e.g., `v1.0.0`):**
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The workflow automatically creates a release with:
+- `app-bootstrap.exe` (Windows native)
+- `app-bootstrap` (Linux native)
+- `app-bootstrap` (macOS native)
+- `app-bootstrap-0.0.1-SNAPSHOT.jar` (traditional JAR)
 
 **No manual building needed for end users!** Just download from the [Releases page](../../releases/latest).
 
@@ -450,6 +560,8 @@ src/main/java/org/springboot/bootstrap/
 - **Java**: 21
 - **Build Tool**: Gradle
 - **HTTP Client**: Apache HttpClient 5
+- **Native Image**: GraalVM Native Image support for ultra-fast startup
+- **CI/CD**: GitHub Actions for multi-platform native builds
 
 ## Contributing
 
